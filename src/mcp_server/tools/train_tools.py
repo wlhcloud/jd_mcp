@@ -1,5 +1,6 @@
 from typing import Optional
 from fastmcp import FastMCP, Context
+from mcp_server.logger import log
 from mcp_server.server_config import JD_TRAIN_BASE_URL, JD_TRAIN_API_KEY
 from mcp_server.tools.common import request_json
 
@@ -35,8 +36,10 @@ def register_train_tools(mcp: FastMCP):
             "filename": filename,
             "include_crops": include_crops,
         }
+        url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/ocr/detect"
+        log.info("ocr_pipeline_infer project_id=%s image_url=%s include_crops=%s", project_id, image_url, include_crops)
         response = await client.post(
-            f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/ocr/detect",
+            url,
             json=payload,
             headers={"X-API-Key": JD_TRAIN_API_KEY},
         )

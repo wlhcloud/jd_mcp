@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 import time
 from typing import Any
 
 from fastmcp.server.middleware import Middleware, MiddlewareContext, CallNext
-
-logger = logging.getLogger("jd_mcp.tools")
+from mcp_server.logger import log
 
 
 def _safe(value: Any, depth: int = 0) -> Any:
@@ -39,13 +37,13 @@ class ToolLoggingMiddleware(Middleware):
         tool_name = getattr(message, "name", "unknown")
         arguments = getattr(message, "arguments", None) or {}
         started = time.perf_counter()
-        logger.info("tool_start name=%s args=%s", tool_name, _safe(arguments))
+        log.info("tool_start name=%s args=%s", tool_name, _safe(arguments))
         try:
             result = await call_next(context)
             elapsed_ms = (time.perf_counter() - started) * 1000
-            logger.info("tool_end name=%s status=success elapsed_ms=%.1f", tool_name, elapsed_ms)
+            log.info("tool_end name=%s status=success elapsed_ms=%.1f", tool_name, elapsed_ms)
             return result
         except Exception:
             elapsed_ms = (time.perf_counter() - started) * 1000
-            logger.exception("tool_end name=%s status=error elapsed_ms=%.1f", tool_name, elapsed_ms)
+            log.exception("tool_end name=%s status=error elapsed_ms=%.1f", tool_name, elapsed_ms)
             raise

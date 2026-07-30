@@ -1,5 +1,6 @@
 from typing import Optional
 from fastmcp import FastMCP, Context
+from mcp_server.logger import log
 from mcp_server.server_config import JD_LITERATURE_BASE_URL
 from mcp_server.tools.common import request_json
 
@@ -37,6 +38,7 @@ def register_literature_tools(mcp: FastMCP):
             "min_similarity": min_similarity,
             "knowledge_id": knowledge_id,
         }
+        log.info("literature_search query=%s... top_k=%s knowledge_id=%s", query[:80], top_k, knowledge_id)
         return await request_json(
             client,
             "POST",
@@ -68,6 +70,7 @@ def register_literature_tools(mcp: FastMCP):
                 {"url": url, "business_id": business_id, "attach_name": attach_name}
             ]
         }
+        log.info("literature_split url=%s business_id=%s", url, business_id)
         return await request_json(
             client,
             "POST",
@@ -100,6 +103,7 @@ def register_literature_tools(mcp: FastMCP):
             包含 indexed、already_indexed、attach_id、file_name 和 chunks 的结果对象。
         """
         client = ctx.request_context.lifespan_context["http_client"]
+        log.info("attachment_index_build user_id=%s thread_id=%s name=%s attach_id=%s force=%s", user_id, thread_id, name, attach_id, force)
         return await request_json(
             client,
             "POST",
@@ -143,6 +147,7 @@ def register_literature_tools(mcp: FastMCP):
             包含命中文本、附件名称、chunk 序号和相似度的结果对象。
         """
         client = ctx.request_context.lifespan_context["http_client"]
+        log.info("attachment_search user_id=%s thread_id=%s query=%s... top_k=%s", user_id, thread_id, query[:80], top_k)
         return await request_json(
             client,
             "POST",
@@ -181,6 +186,7 @@ def register_literature_tools(mcp: FastMCP):
             按 chunk 顺序排列的附件文本和 truncated 状态。
         """
         client = ctx.request_context.lifespan_context["http_client"]
+        log.info("attachment_summary_pack user_id=%s thread_id=%s attach_id=%s max_chars=%s", user_id, thread_id, attach_id, max_chars)
         return await request_json(
             client,
             "POST",

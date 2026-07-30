@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastmcp import Context, FastMCP
 
+from mcp_server.logger import log
 from mcp_server.server_config import JD_TRAIN_BASE_URL, JD_TRAIN_VECTOR_API_KEY
 
 GROUP_NAME = "media"
@@ -33,8 +34,10 @@ def register_media_tools(mcp: FastMCP):
         if not isinstance(image_url, str) or not image_url.startswith(("http://", "https://")):
             raise ValueError("image_url 必须是可访问的 HTTP/HTTPS 地址")
         client = ctx.request_context.lifespan_context["http_client"]
+        url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/rare-characters/search"
+        log.info("rare_character_search project_id=%s image_url=%s top_k=%s", project_id, image_url, top_k)
         response = await client.post(
-            f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/rare-characters/search",
+            url,
             json={"image_url": image_url, "top_k": top_k, "min_similarity": min_similarity},
             headers={"X-API-Key": JD_TRAIN_VECTOR_API_KEY},
         )
@@ -64,8 +67,10 @@ def register_media_tools(mcp: FastMCP):
         if not isinstance(image_url, str) or not image_url.startswith(("http://", "https://")):
             raise ValueError("image_url 必须是可访问的 HTTP/HTTPS 地址")
         client = ctx.request_context.lifespan_context["http_client"]
+        url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/low-frequency-characters/search"
+        log.info("low_frequency_search project_id=%s image_url=%s top_k=%s", project_id, image_url, top_k)
         response = await client.post(
-            f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/low-frequency-characters/search",
+            url,
             json={"image_url": image_url, "top_k": top_k, "min_similarity": min_similarity},
             headers={"X-API-Key": JD_TRAIN_VECTOR_API_KEY},
         )
