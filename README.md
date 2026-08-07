@@ -11,6 +11,8 @@ literature_split
 media_rare_character_search
 media_low_frequency_search(project_id, image_url)
 ocr_pipeline_infer
+jiandu_annotation_meanings_search(project_id, characters)
+jiandu_interpretation_search(preliminary_text, slip_code, slip_name, era)
 ```
 
 启动：

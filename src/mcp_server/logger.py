@@ -5,7 +5,7 @@ from pathlib import Path
 from loguru import logger as log
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-LOG_FILE = Path(os.getenv("LOG_FILE", "./logs/jd_literature.log"))
+LOG_FILE = Path(os.getenv("LOG_FILE", "./logs/jd_mcp.log"))
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 log.remove()
