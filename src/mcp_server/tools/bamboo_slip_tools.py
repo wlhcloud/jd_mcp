@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 from fastmcp import Context, FastMCP
+from pydantic import Field
 
 from mcp_server.logger import log
 from mcp_server.server_config import JD_API_BASE_URL
@@ -10,7 +11,7 @@ GROUP_NAME = "jiandu_bamboo_slip"
 
 
 def register_bamboo_slip_tools(mcp: FastMCP):
-    """注册简牍本体管理的智能体查询工具。"""
+    """注册简牍本体管理的智能体查询与受控删除工具。"""
 
     @mcp.tool(name=f"{GROUP_NAME}_search")
     async def bamboo_slip_search(
@@ -36,7 +37,7 @@ def register_bamboo_slip_tools(mcp: FastMCP):
         - cid: 藏品 ID
         - excavation_number: 出土号
         - book_name: 书名
-        - script_type: 书体
+        - script_type: 形制类型（简、牍、觚、检），不是隶书等书体
         - material_spec: 材质规格
         - era: 时代
         - preservation_status: 保存状态
@@ -52,7 +53,7 @@ def register_bamboo_slip_tools(mcp: FastMCP):
             slip_name: 简牍名称。
             cid: 藏品 ID。
             era: 时代。
-            script_type: 书体。
+            script_type: 形制类型，不表示书体。
             preliminary_text: OCR 初步释文文本，用于模糊匹配。
             top_k: 返回记录数量，范围 1-20。
             ctx: MCP 运行上下文，由框架注入。
@@ -97,4 +98,39 @@ def register_bamboo_slip_tools(mcp: FastMCP):
             "POST",
             f"{JD_API_BASE_URL}/mcp/jiandu/bamboo-slips/search",
             json=payload,
+        )
+
+    @mcp.tool(
+        name=f"{GROUP_NAME}_delete",
+        title="删除简牍本体",
+        tags={GROUP_NAME, "jiandu_data_mutation", "destructive"},
+    )
+    async def bamboo_slip_delete(
+        record_id: Annotated[int, Field(description="简牍本体记录 ID，必须来自查询结果。", gt=0)],
+        expected_slip_code: Annotated[
+            str,
+            Field(description="查询结果中的简牍编号，用于与记录 ID 交叉校验。", min_length=1),
+        ],
+        ctx: Context = None,
+    ) -> dict:
+        """逻辑删除一条简牍本体记录；执行前必须获得用户确认。
+
+        必须先通过 jiandu_bamboo_slip_list 或 jiandu_bamboo_slip_search 找到目标，
+        再同时传入记录 ID 和简牍编号。该工具由 Agent Runtime 的人工审批中间件
+        强制拦截；未经批准不会请求删除接口。禁止猜测 ID 或简牍编号。
+        """
+        slip_code = str(expected_slip_code or "").strip()
+        if not slip_code:
+            raise ValueError("expected_slip_code 不能为空")
+        client = ctx.request_context.lifespan_context["http_client"]
+        log.warning(
+            "bamboo_slip_delete record_id=%s expected_slip_code=%s",
+            record_id,
+            slip_code,
+        )
+        return await request_json(
+            client,
+            "POST",
+            f"{JD_API_BASE_URL}/mcp/jiandu/bamboo-slips/delete",
+            json={"id": int(record_id), "expectedSlipCode": slip_code},
         )

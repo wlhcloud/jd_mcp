@@ -12,8 +12,8 @@ def register_train_tools(mcp: FastMCP):
 
     @mcp.tool(name="jiandu_annotation_meanings_search")
     async def annotation_meanings_search(
-        project_id: int,
         characters: list[str],
+        project_id: int = 4,
         limit_per_character: int = 5,
         ctx: Context = None,
     ) -> dict:
@@ -66,8 +66,8 @@ def register_train_tools(mcp: FastMCP):
 
     @mcp.tool(name=f"{GROUP_NAME}_pipeline_infer")
     async def ocr_pipeline_infer(
-        project_id: int,
         image_url: str,
+        project_id: int = 4,
         filename: str = "image.jpg",
         include_crops: bool = False,
         ctx: Context = None,

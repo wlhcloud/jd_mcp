@@ -9,6 +9,7 @@ from mcp_server.tools.interpretation_tools import register_interpretation_tools
 from mcp_server.tools.media_tools import register_media_tools
 from mcp_server.tools.train_tools import register_train_tools
 from mcp_server.tools.collection_tools import register_collection_tools
+from mcp_server.tools.jiandu_list_tools import register_jiandu_list_tools
 
 mcp = FastMCP(
     name="简牍业务 MCP 中台",
@@ -24,6 +25,7 @@ register_bamboo_slip_tools(mcp)
 register_media_tools(mcp)
 register_train_tools(mcp)
 register_collection_tools(mcp)
+register_jiandu_list_tools(mcp)
 
 
 def main():

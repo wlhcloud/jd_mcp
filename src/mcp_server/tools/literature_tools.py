@@ -279,6 +279,32 @@ def register_literature_tools(mcp: FastMCP):
             },
         )
 
+    @mcp.tool(name=f"{ATTACHMENT_GROUP_NAME}_list")
+    async def attachment_list(
+        user_id: str,
+        thread_id: str,
+        ctx: Context = None,
+    ) -> dict:
+        """列出当前聊天会话中已经注册的附件及生命周期状态。
+
+        当本轮请求未携带新附件，但用户继续询问“这个文档”“之前的附件”等内容时，
+        先调用本工具恢复历史附件。返回 attachment_count 和 attachments；每项包含
+        attach_id、file_name、url、mime_type、status。status 为 registered 时可使用返回的
+        url 调用 attachment_index_build；ready 表示内容索引已经可用；failed 表示上次解析失败。
+        """
+        client = ctx.request_context.lifespan_context["http_client"]
+        log.info(
+            "attachment_list user_id=%s thread_id=%s",
+            user_id,
+            thread_id,
+        )
+        return await request_json(
+            client,
+            "POST",
+            f"{JD_LITERATURE_BASE_URL}/api/literature/attachments/list",
+            json={"user_id": user_id, "thread_id": thread_id},
+        )
+
     @mcp.tool(name=f"{ATTACHMENT_GROUP_NAME}_summary_pack")
     async def attachment_summary_pack(
         user_id: str,
