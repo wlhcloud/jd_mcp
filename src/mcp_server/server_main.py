@@ -1,3 +1,12 @@
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# server_config / logger 在 import 时就读取 os.getenv，
+# 因此必须在导入其他 mcp_server 模块之前加载项目根目录的 .env，
+# 保证终端/screen 启动（非 VSCode 环境）也能读到配置。
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
 from fastmcp import FastMCP
 from mcp_server.http_base import mcp_lifespan
 from mcp_server.logger import log
