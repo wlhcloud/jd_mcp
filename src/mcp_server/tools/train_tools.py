@@ -1,7 +1,7 @@
 from typing import Optional
 from fastmcp import FastMCP, Context
 from mcp_server.logger import log
-from mcp_server.server_config import JD_TRAIN_BASE_URL
+from mcp_server.server_config import JD_TRAIN_BASE_URL, MCP_OCR_HTTP_TIMEOUT
 from mcp_server.tools.common import request_json
 
 GROUP_NAME = "ocr"
@@ -113,6 +113,7 @@ def register_train_tools(mcp: FastMCP):
         response = await client.post(
             url,
             json=payload,
+            timeout=MCP_OCR_HTTP_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()

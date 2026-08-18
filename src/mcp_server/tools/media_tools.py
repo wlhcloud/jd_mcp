@@ -3,7 +3,7 @@ from typing import Optional
 from fastmcp import Context, FastMCP
 
 from mcp_server.logger import log
-from mcp_server.server_config import JD_TRAIN_BASE_URL
+from mcp_server.server_config import JD_TRAIN_BASE_URL, MCP_MEDIA_HTTP_TIMEOUT
 
 GROUP_NAME = "media"
 
@@ -57,6 +57,7 @@ def register_media_tools(mcp: FastMCP):
                 "top_k": top_k,
                 "min_similarity": min_similarity,
             },
+            timeout=MCP_MEDIA_HTTP_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()
@@ -107,6 +108,7 @@ def register_media_tools(mcp: FastMCP):
                 "top_k": top_k,
                 "min_similarity": min_similarity,
             },
+            timeout=MCP_MEDIA_HTTP_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()
