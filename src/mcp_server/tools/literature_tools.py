@@ -87,6 +87,7 @@ def register_literature_tools(mcp: FastMCP):
     async def literature_search(
         query: str,
         top_k: int = 5,
+        min_similarity: Optional[float] = None,
         query_image: Optional[str] = None,
         evaluate: bool = False,
         ctx: Context = None,
@@ -115,10 +116,11 @@ def register_literature_tools(mcp: FastMCP):
         payload = {
             "query": query,
             "top_k": top_k,
-            "min_similarity": 0.7,
             "knowledge_id": None,  # 目前不支持指定知识库 ID，保留参数以兼容未来扩展
             "evaluate": evaluate,
         }
+        if min_similarity is not None:
+            payload["min_similarity"] = min_similarity
         if query_image:
             payload["query_image"] = query_image
         log.info(
@@ -181,6 +183,7 @@ def register_literature_tools(mcp: FastMCP):
         url: str,
         name: str,
         attach_id: str,
+        run_id: Optional[str] = None,
         force: bool = False,
         ctx: Context = None,
     ) -> dict:
@@ -215,6 +218,7 @@ def register_literature_tools(mcp: FastMCP):
             json={
                 "user_id": user_id,
                 "thread_id": thread_id,
+                "run_id": run_id,
                 "attachment": {
                     "url": url,
                     "name": name,
@@ -229,6 +233,7 @@ def register_literature_tools(mcp: FastMCP):
         user_id: str,
         thread_id: str,
         query: str,
+        run_id: Optional[str] = None,
         attach_id: Optional[str] = None,
         attachment_name: Optional[str] = None,
         top_k: int = 6,
@@ -272,6 +277,7 @@ def register_literature_tools(mcp: FastMCP):
                 "user_id": user_id,
                 "thread_id": thread_id,
                 "query": query,
+                "run_id": run_id,
                 "attach_id": attach_id,
                 "attachment_name": attachment_name,
                 "top_k": top_k,
@@ -283,6 +289,7 @@ def register_literature_tools(mcp: FastMCP):
     async def attachment_list(
         user_id: str,
         thread_id: str,
+        run_id: Optional[str] = None,
         ctx: Context = None,
     ) -> dict:
         """列出当前聊天会话中已经注册的附件及生命周期状态。
@@ -302,16 +309,18 @@ def register_literature_tools(mcp: FastMCP):
             client,
             "POST",
             f"{JD_LITERATURE_BASE_URL}/api/literature/attachments/list",
-            json={"user_id": user_id, "thread_id": thread_id},
+            json={"user_id": user_id, "thread_id": thread_id, "run_id": run_id},
         )
 
     @mcp.tool(name=f"{ATTACHMENT_GROUP_NAME}_summary_pack")
     async def attachment_summary_pack(
         user_id: str,
         thread_id: str,
+        run_id: Optional[str] = None,
         attach_id: Optional[str] = None,
         max_chars: int = 12000,
         chunk_limit: int = 80,
+        start_chunk: int = 0,
         ctx: Context = None,
     ) -> dict:
         """按原始顺序读取会话附件文本块，供摘要和问答使用。
@@ -345,8 +354,10 @@ def register_literature_tools(mcp: FastMCP):
             json={
                 "user_id": user_id,
                 "thread_id": thread_id,
+                "run_id": run_id,
                 "attach_id": attach_id,
                 "max_chars": max_chars,
                 "chunk_limit": chunk_limit,
+                "start_chunk": start_chunk,
             },
         )
