@@ -48,7 +48,7 @@ def register_train_tools(mcp: FastMCP):
 
         client = ctx.request_context.lifespan_context["http_client"]
         log.info(
-            "annotation_meanings_search project_id=%s characters=%s",
+            "annotation_meanings_search project_id={} characters={}",
             project_id,
             normalized,
         )
@@ -105,7 +105,7 @@ def register_train_tools(mcp: FastMCP):
         }
         url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/ocr/detect"
         log.info(
-            "ocr_pipeline_infer project_id=%s image_url=%s include_crops=%s",
+            "ocr_pipeline_infer project_id={} image_url={} include_crops={}",
             project_id,
             image_url,
             include_crops,

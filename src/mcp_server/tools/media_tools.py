@@ -45,7 +45,7 @@ def register_media_tools(mcp: FastMCP):
         client = ctx.request_context.lifespan_context["http_client"]
         url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/rare-characters/search"
         log.info(
-            "rare_character_search project_id=%s image_url=%s top_k=%s",
+            "rare_character_search project_id={} image_url={} top_k={}",
             project_id,
             image_url,
             top_k,
@@ -96,7 +96,7 @@ def register_media_tools(mcp: FastMCP):
         client = ctx.request_context.lifespan_context["http_client"]
         url = f"{JD_TRAIN_BASE_URL}/api/project/{project_id}/low-frequency-characters/search"
         log.info(
-            "low_frequency_search project_id=%s image_url=%s top_k=%s",
+            "low_frequency_search project_id={} image_url={} top_k={}",
             project_id,
             image_url,
             top_k,

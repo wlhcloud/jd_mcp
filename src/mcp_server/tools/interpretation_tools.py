@@ -62,7 +62,7 @@ def register_interpretation_tools(mcp: FastMCP):
             "top_k": int(top_k),
         }
         log.info(
-            "interpretation_search slip_code=%s slip_name=%s top_k=%s",
+            "interpretation_search slip_code={} slip_name={} top_k={}",
             payload["slip_code"],
             payload["slip_name"],
             payload["top_k"],

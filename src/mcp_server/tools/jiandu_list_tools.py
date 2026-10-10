@@ -58,13 +58,25 @@ def register_jiandu_list_tools(mcp: FastMCP):
         tags={RARE_CHARACTER_GROUP, "jiandu_data_query"},
     )
     async def rare_character_list(
-        char_code: Annotated[Optional[str], Field(description="生僻字编号，精确匹配，例如 SPZ001。")]=None,
-        pinyin: Annotated[Optional[str], Field(description="拼音关键字，模糊匹配。")]=None,
-        stroke_order: Annotated[Optional[str], Field(description="笔顺关键字，模糊匹配。")]=None,
-        structure: Annotated[Optional[str], Field(description="字形结构关键字，模糊匹配。")]=None,
-        stroke_count: Annotated[Optional[str], Field(description="笔画数，精确匹配。")]=None,
+        char_code: Annotated[
+            Optional[str], Field(description="生僻字编号，精确匹配，例如 SPZ001。")
+        ] = None,
+        pinyin: Annotated[
+            Optional[str], Field(description="拼音关键字，模糊匹配。")
+        ] = None,
+        stroke_order: Annotated[
+            Optional[str], Field(description="笔顺关键字，模糊匹配。")
+        ] = None,
+        structure: Annotated[
+            Optional[str], Field(description="字形结构关键字，模糊匹配。")
+        ] = None,
+        stroke_count: Annotated[
+            Optional[str], Field(description="笔画数，精确匹配。")
+        ] = None,
         page: Annotated[int, Field(description="页码，从 1 开始。", ge=1)] = 1,
-        size: Annotated[int, Field(description="每页条数，范围 1-50。", ge=1, le=50)] = 10,
+        size: Annotated[
+            int, Field(description="每页条数，范围 1-50。", ge=1, le=50)
+        ] = 10,
         ctx: Context = None,
     ) -> dict:
         """分页检索生僻字列表，可组合编号、拼音、笔顺、结构和笔画数条件。
@@ -74,14 +86,26 @@ def register_jiandu_list_tools(mcp: FastMCP):
         jiandu_rare_character_detail。
         """
         payload = _list_payload(
-            page, size, charCode=char_code, charPinyin=pinyin,
-            charStrokeOrder=stroke_order, charStructure=structure,
+            page,
+            size,
+            charCode=char_code,
+            charPinyin=pinyin,
+            charStrokeOrder=stroke_order,
+            charStructure=structure,
             charStrokeCount=stroke_count,
         )
-        log.info("rare_character_list page=%s size=%s filters=%s", page, size, len(payload) - 2)
+        log.info(
+            "rare_character_list page={} size={} filters={}",
+            page,
+            size,
+            len(payload) - 2,
+        )
         client = ctx.request_context.lifespan_context["http_client"]
         result = await request_json(
-            client, "POST", f"{JD_API_BASE_URL}/mcp/jiandu/rare-characters/list", json=payload
+            client,
+            "POST",
+            f"{JD_API_BASE_URL}/mcp/jiandu/rare-characters/list",
+            json=payload,
         )
         return _completed_query(result)
 
@@ -91,14 +115,16 @@ def register_jiandu_list_tools(mcp: FastMCP):
         tags={RARE_CHARACTER_GROUP, "jiandu_data_query"},
     )
     async def rare_character_detail(
-        char_code: Annotated[str, Field(description="生僻字编号，精确匹配，例如 SPZ001。", min_length=1)],
+        char_code: Annotated[
+            str, Field(description="生僻字编号，精确匹配，例如 SPZ001。", min_length=1)
+        ],
         ctx: Context = None,
     ) -> dict:
         """根据生僻字编号精确查询单条详情和图片在线地址，不做模糊匹配。"""
         code = str(char_code or "").strip()
         if not code:
             raise ValueError("char_code 不能为空")
-        log.info("rare_character_detail char_code=%s", code)
+        log.info("rare_character_detail char_code={}", code)
         client = ctx.request_context.lifespan_context["http_client"]
         result = await request_json(
             client,
@@ -119,11 +145,19 @@ def register_jiandu_list_tools(mcp: FastMCP):
             Field(description="查询模块：简牍本体、简牍释文或数字资产。"),
         ],
         field: Annotated[
-            Optional[Literal[
-                "era", "script_type", "material_spec", "preservation_status",
-                "batch_code", "chapter_code", "section_code",
-                "secret_level", "status",
-            ]],
+            Optional[
+                Literal[
+                    "era",
+                    "script_type",
+                    "material_spec",
+                    "preservation_status",
+                    "batch_code",
+                    "chapter_code",
+                    "section_code",
+                    "secret_level",
+                    "status",
+                ]
+            ],
             Field(description="字典字段；不传时返回该模块全部动态选项。"),
         ] = None,
         keyword: Annotated[
@@ -156,18 +190,53 @@ def register_jiandu_list_tools(mcp: FastMCP):
         tags={BAMBOO_SLIP_GROUP, "jiandu_data_query"},
     )
     async def bamboo_slip_list(
-        slip_code: Annotated[Optional[str], Field(description="简牍编号，精确匹配。")]=None,
-        slip_name: Annotated[Optional[str], Field(description="简牍名称，模糊匹配。")]=None,
-        excavation_number: Annotated[Optional[str], Field(description="出版号，精确匹配；API 字段为 excavationNumber。")]=None,
-        book_name: Annotated[Optional[str], Field(description="所属书名，模糊匹配。")]=None,
-        script_type: Annotated[Optional[str], Field(description="形制类型字典键或显示名称（如简、牍、觚、检），不是隶书等书体；不确定时先调用 jiandu_query_options。")]=None,
-        material_spec: Annotated[Optional[str], Field(description="材质规格字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        era: Annotated[Optional[str], Field(description="年代字典键或显示名称（如西汉）；不确定时先调用 jiandu_query_options。")]=None,
-        preservation_status: Annotated[Optional[str], Field(description="保存状况字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        basic_info: Annotated[Optional[str], Field(description="基本信息关键字，模糊匹配。")]=None,
-        details: Annotated[Optional[str], Field(description="详细信息关键字，模糊匹配。")]=None,
+        slip_code: Annotated[
+            Optional[str], Field(description="简牍编号，精确匹配。")
+        ] = None,
+        slip_name: Annotated[
+            Optional[str], Field(description="简牍名称，模糊匹配。")
+        ] = None,
+        excavation_number: Annotated[
+            Optional[str],
+            Field(description="出版号，精确匹配；API 字段为 excavationNumber。"),
+        ] = None,
+        book_name: Annotated[
+            Optional[str], Field(description="所属书名，模糊匹配。")
+        ] = None,
+        script_type: Annotated[
+            Optional[str],
+            Field(
+                description="形制类型字典键或显示名称（如简、牍、觚、检），不是隶书等书体；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        material_spec: Annotated[
+            Optional[str],
+            Field(
+                description="材质规格字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        era: Annotated[
+            Optional[str],
+            Field(
+                description="年代字典键或显示名称（如西汉）；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        preservation_status: Annotated[
+            Optional[str],
+            Field(
+                description="保存状况字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        basic_info: Annotated[
+            Optional[str], Field(description="基本信息关键字，模糊匹配。")
+        ] = None,
+        details: Annotated[
+            Optional[str], Field(description="详细信息关键字，模糊匹配。")
+        ] = None,
         page: Annotated[int, Field(description="页码，从 1 开始。", ge=1)] = 1,
-        size: Annotated[int, Field(description="每页条数，范围 1-50。", ge=1, le=50)] = 10,
+        size: Annotated[
+            int, Field(description="每页条数，范围 1-50。", ge=1, le=50)
+        ] = 10,
         ctx: Context = None,
     ) -> dict:
         """按结构化条件查询简牍本体列表并分页。
@@ -194,15 +263,29 @@ def register_jiandu_list_tools(mcp: FastMCP):
             ctx: MCP 运行上下文，由框架注入。
         """
         payload = _list_payload(
-            page, size, slipCode=slip_code, slipName=slip_name,
-            excavationNumber=excavation_number, bookName=book_name,
-            scriptType=script_type, materialSpec=material_spec, era=era,
-            preservationStatus=preservation_status, basicInfo=basic_info,
+            page,
+            size,
+            slipCode=slip_code,
+            slipName=slip_name,
+            excavationNumber=excavation_number,
+            bookName=book_name,
+            scriptType=script_type,
+            materialSpec=material_spec,
+            era=era,
+            preservationStatus=preservation_status,
+            basicInfo=basic_info,
             details=details,
         )
-        log.info("bamboo_slip_list page=%s size=%s filters=%s", page, size, len(payload) - 2)
+        log.info(
+            "bamboo_slip_list page={} size={} filters={}", page, size, len(payload) - 2
+        )
         client = ctx.request_context.lifespan_context["http_client"]
-        result = await request_json(client, "POST", f"{JD_API_BASE_URL}/mcp/jiandu/bamboo-slips/list", json=payload)
+        result = await request_json(
+            client,
+            "POST",
+            f"{JD_API_BASE_URL}/mcp/jiandu/bamboo-slips/list",
+            json=payload,
+        )
         return _completed_query(result)
 
     @mcp.tool(
@@ -211,17 +294,49 @@ def register_jiandu_list_tools(mcp: FastMCP):
         tags={INTERPRETATION_GROUP, "jiandu_data_query"},
     )
     async def interpretation_list(
-        slip_code: Annotated[Optional[str], Field(description="简牍编号，精确匹配。")]=None,
-        total_code: Annotated[Optional[str], Field(description="释文总编号，精确匹配。")]=None,
-        slip_name: Annotated[Optional[str], Field(description="简牍名称，模糊匹配。")]=None,
-        era: Annotated[Optional[str], Field(description="年代字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        batch_code: Annotated[Optional[str], Field(description="批次字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        chapter_code: Annotated[Optional[str], Field(description="章节字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        section_code: Annotated[Optional[str], Field(description="小节字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        interpretation_content: Annotated[Optional[str], Field(description="释文内容关键字，模糊匹配。")]=None,
-        remark: Annotated[Optional[str], Field(description="备注关键字，模糊匹配。")]=None,
+        slip_code: Annotated[
+            Optional[str], Field(description="简牍编号，精确匹配。")
+        ] = None,
+        total_code: Annotated[
+            Optional[str], Field(description="释文总编号，精确匹配。")
+        ] = None,
+        slip_name: Annotated[
+            Optional[str], Field(description="简牍名称，模糊匹配。")
+        ] = None,
+        era: Annotated[
+            Optional[str],
+            Field(
+                description="年代字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        batch_code: Annotated[
+            Optional[str],
+            Field(
+                description="批次字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        chapter_code: Annotated[
+            Optional[str],
+            Field(
+                description="章节字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        section_code: Annotated[
+            Optional[str],
+            Field(
+                description="小节字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        interpretation_content: Annotated[
+            Optional[str], Field(description="释文内容关键字，模糊匹配。")
+        ] = None,
+        remark: Annotated[
+            Optional[str], Field(description="备注关键字，模糊匹配。")
+        ] = None,
         page: Annotated[int, Field(description="页码，从 1 开始。", ge=1)] = 1,
-        size: Annotated[int, Field(description="每页条数，范围 1-50。", ge=1, le=50)] = 10,
+        size: Annotated[
+            int, Field(description="每页条数，范围 1-50。", ge=1, le=50)
+        ] = 10,
         ctx: Context = None,
     ) -> dict:
         """按结构化条件查询简牍释文记录并分页。
@@ -245,14 +360,31 @@ def register_jiandu_list_tools(mcp: FastMCP):
             ctx: MCP 运行上下文，由框架注入。
         """
         payload = _list_payload(
-            page, size, slipCode=slip_code, totalCode=total_code,
-            slipName=slip_name, era=era, batchCode=batch_code,
-            chapterCode=chapter_code, sectionCode=section_code,
-            interpretationContent=interpretation_content, remark=remark,
+            page,
+            size,
+            slipCode=slip_code,
+            totalCode=total_code,
+            slipName=slip_name,
+            era=era,
+            batchCode=batch_code,
+            chapterCode=chapter_code,
+            sectionCode=section_code,
+            interpretationContent=interpretation_content,
+            remark=remark,
         )
-        log.info("interpretation_list page=%s size=%s filters=%s", page, size, len(payload) - 2)
+        log.info(
+            "interpretation_list page={} size={} filters={}",
+            page,
+            size,
+            len(payload) - 2,
+        )
         client = ctx.request_context.lifespan_context["http_client"]
-        result = await request_json(client, "POST", f"{JD_API_BASE_URL}/mcp/jiandu/interpretations/list", json=payload)
+        result = await request_json(
+            client,
+            "POST",
+            f"{JD_API_BASE_URL}/mcp/jiandu/interpretations/list",
+            json=payload,
+        )
         return _completed_query(result)
 
     @mcp.tool(
@@ -261,15 +393,38 @@ def register_jiandu_list_tools(mcp: FastMCP):
         tags={DIGITAL_ASSET_GROUP, "jiandu_data_query"},
     )
     async def digital_asset_list(
-        assets_no: Annotated[Optional[str], Field(description="数字资产编号，精确匹配。")]=None,
-        assets_name: Annotated[Optional[str], Field(description="数字资产名称，模糊匹配。")]=None,
-        secret_level: Annotated[Optional[str], Field(description="密级字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
-        author: Annotated[Optional[str], Field(description="作者名称，模糊匹配。")]=None,
-        handlemen: Annotated[Optional[str], Field(description="经手人名称，模糊匹配；字段名沿用业务接口 handlemen。")]=None,
-        characters: Annotated[Optional[str], Field(description="资产文字内容关键字，模糊匹配。")]=None,
-        status: Annotated[Optional[str], Field(description="资产状态字典键或显示名称；不确定时先调用 jiandu_query_options。")]=None,
+        assets_no: Annotated[
+            Optional[str], Field(description="数字资产编号，精确匹配。")
+        ] = None,
+        assets_name: Annotated[
+            Optional[str], Field(description="数字资产名称，模糊匹配。")
+        ] = None,
+        secret_level: Annotated[
+            Optional[str],
+            Field(
+                description="密级字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
+        author: Annotated[
+            Optional[str], Field(description="作者名称，模糊匹配。")
+        ] = None,
+        handlemen: Annotated[
+            Optional[str],
+            Field(description="经手人名称，模糊匹配；字段名沿用业务接口 handlemen。"),
+        ] = None,
+        characters: Annotated[
+            Optional[str], Field(description="资产文字内容关键字，模糊匹配。")
+        ] = None,
+        status: Annotated[
+            Optional[str],
+            Field(
+                description="资产状态字典键或显示名称；不确定时先调用 jiandu_query_options。"
+            ),
+        ] = None,
         page: Annotated[int, Field(description="页码，从 1 开始。", ge=1)] = 1,
-        size: Annotated[int, Field(description="每页条数，范围 1-50。", ge=1, le=50)] = 10,
+        size: Annotated[
+            int, Field(description="每页条数，范围 1-50。", ge=1, le=50)
+        ] = 10,
         ctx: Context = None,
     ) -> dict:
         """按编号、名称、密级、作者、经手人、文字或状态查询数字资产。
@@ -292,11 +447,27 @@ def register_jiandu_list_tools(mcp: FastMCP):
             ctx: MCP 运行上下文，由框架注入。
         """
         payload = _list_payload(
-            page, size, assetsNo=assets_no, assetsName=assets_name,
-            secretLevel=secret_level, author=author, handlemen=handlemen,
-            characters=characters, status=status,
+            page,
+            size,
+            assetsNo=assets_no,
+            assetsName=assets_name,
+            secretLevel=secret_level,
+            author=author,
+            handlemen=handlemen,
+            characters=characters,
+            status=status,
         )
-        log.info("digital_asset_list page=%s size=%s filters=%s", page, size, len(payload) - 2)
+        log.info(
+            "digital_asset_list page={} size={} filters={}",
+            page,
+            size,
+            len(payload) - 2,
+        )
         client = ctx.request_context.lifespan_context["http_client"]
-        result = await request_json(client, "POST", f"{JD_API_BASE_URL}/mcp/jiandu/digital-assets/list", json=payload)
+        result = await request_json(
+            client,
+            "POST",
+            f"{JD_API_BASE_URL}/mcp/jiandu/digital-assets/list",
+            json=payload,
+        )
         return _completed_query(result)

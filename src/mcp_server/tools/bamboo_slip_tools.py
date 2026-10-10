@@ -87,7 +87,7 @@ def register_bamboo_slip_tools(mcp: FastMCP):
             "top_k": int(top_k),
         }
         log.info(
-            "bamboo_slip_search slip_code=%s excavation_number=%s cid=%s top_k=%s",
+            "bamboo_slip_search slip_code={} excavation_number={} cid={} top_k={}",
             payload["slip_code"],
             payload["excavation_number"],
             payload["cid"],
@@ -106,10 +106,15 @@ def register_bamboo_slip_tools(mcp: FastMCP):
         tags={GROUP_NAME, "jiandu_data_mutation", "destructive"},
     )
     async def bamboo_slip_delete(
-        record_id: Annotated[int, Field(description="简牍本体记录 ID，必须来自查询结果。", gt=0)],
+        record_id: Annotated[
+            int, Field(description="简牍本体记录 ID，必须来自查询结果。", gt=0)
+        ],
         expected_slip_code: Annotated[
             str,
-            Field(description="查询结果中的简牍编号，用于与记录 ID 交叉校验。", min_length=1),
+            Field(
+                description="查询结果中的简牍编号，用于与记录 ID 交叉校验。",
+                min_length=1,
+            ),
         ],
         ctx: Context = None,
     ) -> dict:
@@ -124,7 +129,7 @@ def register_bamboo_slip_tools(mcp: FastMCP):
             raise ValueError("expected_slip_code 不能为空")
         client = ctx.request_context.lifespan_context["http_client"]
         log.warning(
-            "bamboo_slip_delete record_id=%s expected_slip_code=%s",
+            "bamboo_slip_delete record_id={} expected_slip_code={}",
             record_id,
             slip_code,
         )

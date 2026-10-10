@@ -124,7 +124,7 @@ def register_literature_tools(mcp: FastMCP):
         if query_image:
             payload["query_image"] = query_image
         log.info(
-            "literature_search query=%s... top_k=%s query_image=%s",
+            "literature_search query={}... top_k={} query_image={}",
             query[:80],
             top_k,
             bool(query_image),
@@ -204,7 +204,7 @@ def register_literature_tools(mcp: FastMCP):
         """
         client = ctx.request_context.lifespan_context["http_client"]
         log.info(
-            "attachment_index_build user_id=%s thread_id=%s name=%s attach_id=%s force=%s",
+            "attachment_index_build user_id={} thread_id={} name={} attach_id={} force={}",
             user_id,
             thread_id,
             name,
@@ -263,7 +263,7 @@ def register_literature_tools(mcp: FastMCP):
         """
         client = ctx.request_context.lifespan_context["http_client"]
         log.info(
-            "attachment_search user_id=%s thread_id=%s query=%s... top_k=%s",
+            "attachment_search user_id={} thread_id={} query={}... top_k={}",
             user_id,
             thread_id,
             query[:80],
@@ -301,7 +301,7 @@ def register_literature_tools(mcp: FastMCP):
         """
         client = ctx.request_context.lifespan_context["http_client"]
         log.info(
-            "attachment_list user_id=%s thread_id=%s",
+            "attachment_list user_id={} thread_id={}",
             user_id,
             thread_id,
         )
@@ -341,7 +341,7 @@ def register_literature_tools(mcp: FastMCP):
         """
         client = ctx.request_context.lifespan_context["http_client"]
         log.info(
-            "attachment_summary_pack user_id=%s thread_id=%s attach_id=%s max_chars=%s",
+            "attachment_summary_pack user_id={} thread_id={} attach_id={} max_chars={}",
             user_id,
             thread_id,
             attach_id,
